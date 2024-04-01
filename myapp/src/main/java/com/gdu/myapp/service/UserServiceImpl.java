@@ -12,16 +12,19 @@ import org.springframework.stereotype.Service;
 
 import com.gdu.myapp.dto.UserDto;
 import com.gdu.myapp.mapper.UserMapper;
+import com.gdu.myapp.utils.MyJavaMailUtils;
 import com.gdu.myapp.utils.MySecurityUtils;
 
 @Service
 public class UserServiceImpl implements UserService {
   
   private final UserMapper userMapper;
+  private final MyJavaMailUtils myJavaMailUtils;
 
-  public UserServiceImpl(UserMapper userMapper) {
+  public UserServiceImpl(UserMapper userMapper, MyJavaMailUtils myJavaMailUtils) {
     super();
     this.userMapper = userMapper;
+    this.myJavaMailUtils = myJavaMailUtils;
   }
 
   @Override
@@ -80,6 +83,11 @@ public class UserServiceImpl implements UserService {
                         && userMapper.getLeaveUserByMap(params) == null;
     return new ResponseEntity<>(Map.of("enableEmail", enableEmail)
                                       , HttpStatus.OK);
+  }
+  
+  @Override
+  public ResponseEntity<Map<String, Object>> sendCode(Map<String, Object> params) {
+    return null;
   }
 
   @Override

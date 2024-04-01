@@ -12,8 +12,10 @@ import javax.mail.internet.MimeMessage;
 
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 @PropertySource(value = "classpath:email.properties")
+@Component
 public class MyJavaMailUtils {
   
   private Environment env;
