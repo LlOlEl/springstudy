@@ -35,109 +35,137 @@
   <form method="POST"
         action="${contextPath}/user/signup.do"
         id="frm-signup">
-     <div class="mb-3">
-      <label for="eamil">아이디</label>
-      <input type="text" id="email" placeholder="example@example.com">
-      <button type="button" id="btn-code">인증코드받기</button>
+  
+    <div class="mb-3">
+      <label for="inp-email">아이디</label>
+      <input type="text" id="inp-email" name="email" placeholder="example@example.com">
+      <button type="button" id="btn-code" class="btn btn-primary">인증코드받기</button>
       <div id="msg-email"></div>
-     </div>
-     <div class="mb-3">
-      <input type="text" id="code" placeholder="인증코드입력" disabled>
-      <button type="button" id="btn-verify-code" class="btn btn-primary">인증하기</button>    
-     </div>     
+    </div>
+    <div class="mb-3">
+      <input type="text" id="inp-code" placeholder="인증코드입력" disabled>
+      <button type="button" id="btn-verify-code" class="btn btn-primary">인증하기</button>
+    </div>
   
   </form>
+
+<script>
+
+const fnGetContextPath = ()=>{
+  const host = location.host;  /* localhost:8080 */
+  const url = location.href;   /* http://localhost:8080/mvc/getDate.do */
+  const begin = url.indexOf(host) + host.length;
+  const end = url.indexOf('/', begin + 1);
+  return url.substring(begin, end);
+}
+
+const fnCheckEmail = ()=>{
   
-  <script>
-    const fnGetContextPath = ()=>{
-  	  const host = location.host;  /* localhost:8080 */
-  	  const url = location.href;   /* http://localhost:8080/mvc/getDate.do */
-  	  const begin = url.indexOf(host) + host.length;
-  	  const end = url.indexOf('/', begin + 1);
-  	  return url.substring(begin, end);
-  	}
-    
-    
-    
-    /* 이메일 입력 받아서 인증코드까지 */
-    const fnCheckEmail =  ()=>{
-    	
-    	/*
-        new Promise((resolve, reject) => {
-          $.ajax({
-            url: '이메일중복체크요청'
-          })
-          .done(resData => {
-            if(resData.enableEmail){
-              resolve();
-            } else {
-              reject();
-            }
-          })
-        })
-        .then(() => {
-          $.ajax({
-            url: '인증코드전송요청'
-          })
-          .done(resData => {
-            if(resData.code === 인증코드입력값)
-          })
-        })
-        .catch(() => {
-          
-        })
-      */
+  /*
+    new Promise((resolve, reject) => {
+      $.ajax({
+        url: '이메일중복체크요청'
+      })
+      .done(resData => {
+        if(resData.enableEmail){
+          resolve();
+        } else {
+          reject();
+        }
+      })
+    })
+    .then(() => {
+      $.ajax({
+        url: '인증코드전송요청'
+      })
+      .done(resData => {
+        if(resData.code === 인증코드입력값)
+      })
+    })
+    .catch(() => {
       
-      /*
-        fetch('이메일중복체크요청', {})
+    })
+  */
+  
+  /*
+    fetch('이메일중복체크요청', {})
+    .then(response=>response.json())
+    .then(resData=>{
+      if(resData.enableEmail){
+        fetch('인증코드전송요청', {})
         .then(response=>response.json())
-        .then(resData=>{
-          if(resData.enableEmail){
-            fetch('인증코드전송요청', {})
-            .then(response=>response.json())
-            .then(resData=>{  // {"code": "123asb"}
-              if(resData.code === 인증코드입력값)
-            })
+        .then(resData=>{  // {"code": "123asb"}
+          if(resData.code === 인증코드입력값)
+        })
+      }
+    })
+  */
+  
+  let inpEmail = document.getElementById('inp-email');
+  let regEmail = /^[A-Za-z0-9-_]{2,}@[A-Za-z0-9]+(\.[A-Za-z]{2,6}){1,2}$/;
+  if(!regEmail.test(inpEmail.value)){
+    alert('이메일 형식이 올바르지 않습니다.');
+    return;
+  }
+  
+  
+  fetch(fnGetContextPath() + '/user/checkEmail.do', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      'email': inpEmail.value
+    })
+  })
+  .then(response => response.json())  // .then( (response) => { return response.json(); } )
+  .then(resData => {
+    if(resData.enableEmail){
+      fetch(fnGetContextPath() + '/user/sendCode.do', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'email': inpEmail.value
+        })
+      })
+      .then(response => response.json())
+      .then(resData => {  // resData = {"code": "123qaz"}
+        let inpCode = document.getElementById('inp-code');
+        let btnVerifyCode = document.getElementById('btn-verify-code');
+        alert(inpEmail.value + '로 인증코드를 전송했습니다.');
+        inpCode.disabled = false;
+        btnVerifyCode.addEventListener('click', (evt) => {
+          if(resData.code === inpCode.value) {
+            alert('인증되었습니다.');
+          } else {
+            alert('인증되지 않았습니다.');
           }
         })
-      */
-      
-    	let email = document.getElementById('email');
-    	let regEmail = /^[A-Za-z0-9_]{2,}@[A-Za-z0-9]+(\.[A-Za-z]{2,6}){1,2}$/; //시작 ^ ~ $ 끝
-    	if(!regEmail.test(email.value)){ // 이메일 형식을 하고있지 않을 때
-    		alert('이메일 형식이 올바르지 않습니다.');
-    		return;
-    	}
-    	fetch(fnGetContextPath() + '/user/checkEmail.do', { // (주소, {옵션})
-    		method  : 'POST',
-    		headers : {
-    			'Content-Type' : 'application/json'
-    		},
-    		body    : JSON.stringify({
-    			'email' : email.value
-    		})
-    	}); 
-    	.then(response => response.json()) // .then( (response)=> { return response.json(); } )
-    	.then((resData) => {
-    		if(resData.enableEmail){ // 중복 통과 지점
-    			fetch(fnGetContextPath() + '/user/sendCode.do', {
-    				method  : 'POST',
-		        headers : {
-		            'Content-Type' : 'application/json'
-		          },
-	          body    : JSON.stringify({
-		            'email' : email.value
-	          })
-          });
-    		} else { // 똑같은 이메일이 있을 때
-    			document.getElementById('msg-email').innerHTML = '이미 사용 중인 이메일입니다.';
-    			return;
-    		}
-    	})
+      })
+    } else {
+      document.getElementById('msg-email').innerHTML = '이미 사용 중인 이메일입니다.';
+      return;
     }
-    
-    document.getElementById('btn-code').addEventListener('click', fnCheckEmail);
-  </script>
+  })
+}
+
+document.getElementById('btn-code').addEventListener('click', fnCheckEmail);
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
   
 </body>
 </html>
